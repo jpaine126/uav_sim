@@ -7,17 +7,22 @@ rng = np.random.default_rng(42)
 
 @dataclass
 class State:
-    """Class to pass state values for UAV.
-    
-    Holds all data needed for every part of the sim, including UAV physical
-    states and misc parameters.
-    """
+    """Class to pass state values for UAV."""
 
     time: float
 
     position: np.ndarray
     velocity: np.ndarray
-    acceleration: np.ndarray
 
-    euler_angles: np.ndarray
+    angle: np.ndarray
     angle_rate: np.ndarray
+
+
+@dataclass
+class Control:
+    """Class to pass control vector values for UAV."""
+
+    delta_e: np.ndarray
+    delta_r: np.ndarray
+    delta_a: np.ndarray
+    delta_t: np.ndarray
