@@ -9,17 +9,17 @@ class RateGyro(Sensor):
 
     Noise is provided as noise density to allow for varying sample rate while
     keeping the same normal distribution sampling.
-    
+
     Attributes:
         sample_rate: Putput smaple rate of sensor in Hz. Used to convert noise
             density to standard deviation.
-        noise_density: Noise density in degrees/second/sqrt(Hz). Converted to 
+        noise_density: Noise density in degrees/second/sqrt(Hz). Converted to
             standard deviation internally.
         bias: Constant offset of the measurment.
         turn_on_bias: The amount of random error in the bias at turn on. Turn off
             for tuning observers, and turn on to simulate anccounted for bias.
         in_run_bias_rate: The rate at which bias drifts over time while sampling.
-    
+
     """
 
     def __init__(

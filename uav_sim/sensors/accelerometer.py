@@ -9,11 +9,11 @@ class Accelerometer(Sensor):
 
     Noise is provided as noise density to allow for varying sample rate while
     keeping the same normal distribution sampling.
-    
+
     Attributes:
         sample_rate: Putput smaple rate of sensor in Hz. Used to convert noise
             density to standard deviation.
-        noise_density: Noise density in degrees/second/sqrt(Hz). Converted to 
+        noise_density: Noise density in degrees/second/sqrt(Hz). Converted to
             standard deviation internally.
 
     """
