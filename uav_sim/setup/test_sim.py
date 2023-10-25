@@ -103,16 +103,25 @@ body_vertices = [
 ]
 
 initial_position = np.array([0, 0, -100])
-initial_velocity = np.array([15, 0, 0])
+initial_velocity = np.array([10, 0, 0])
 
 initial_angle = np.array([0, 0, 0])
 initial_angle_rate = np.array([0, 0, 0])
 
 initial_state = State(
-    0, initial_position, initial_velocity, initial_angle, initial_angle_rate
+    time=0,
+    position=initial_position,
+    velocity=np.array([9.86075615e00, 1.37564863e-03, 1.66297511e00]),
+    angle=np.array([4.18114984e-05, 1.67073701e-01, 0]),
+    angle_rate=np.array([-0.0, -0.0, 0.0]),
 )
 
-initial_control = Control(0, 0, 0, 10)
+initial_control = Control(
+    delta_e=-0.17373601241098888,
+    delta_r=0.00042232102644198274,
+    delta_a=-0.00034794905156488345,
+    delta_t=0.6407080257401786,
+)
 
 initial_wind = np.array([0, 0, 0, 0, 0, 0])
 
@@ -121,25 +130,29 @@ airframe = Airframe(params, body_vertices)
 
 def wrapper(t, y):
     state = State(t, y[0:3], y[3:6], y[6:9], y[9:12])
-    forces, moments, *_ = airframe.forces_moments(state, initial_control, initial_wind)
-    out = airframe.model_derivative(state, forces, moments)
+    forces, moments, *_ = airframe.forces_moments(
+        state, initial_control, wind=initial_wind
+    )
+    out = airframe.derivative(state, forces, moments)
 
     return out
 
 
-t = np.arange(0, 20, 0.01)
+if __name__ == "__main__":
 
-a = solve_ivp(
-    wrapper,
-    t_span=(t.min(), t.max()),
-    y0=np.hstack(
-        (initial_position, initial_velocity, initial_angle, initial_angle_rate)
-    ),
-    t_eval=t,
-)
+    t = np.arange(0, 20, 0.01)
 
-plot_state(a.t, a.y).show()
+    a = solve_ivp(
+        wrapper,
+        t_span=(t.min(), t.max()),
+        y0=np.hstack(
+            (initial_position, initial_velocity, initial_angle, initial_angle_rate)
+        ),
+        t_eval=t,
+    )
 
-body_animation = animate_airframe(a.t, a.y, airframe.body_vertices)
+    plot_state(a.t, a.y).show()
 
-body_animation.show()
+    body_animation = animate_airframe(a.t, a.y, airframe.body_vertices)
+
+    body_animation.show()
