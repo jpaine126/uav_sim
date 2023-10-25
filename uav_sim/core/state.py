@@ -36,3 +36,13 @@ class Control:
     delta_r: np.ndarray
     delta_a: np.ndarray
     delta_t: np.ndarray
+
+    @classmethod
+    def from_vector(cls, u: np.ndarray):
+        """Instantiate control given an ordered vector of the control surface deflections.
+        
+        Args:
+            u (np.ndarray): 13 x 0 array of controls elevator, rudder, aileron,
+                and thrust.
+        """
+        return cls(u[0], u[1], u[2], u[3])
