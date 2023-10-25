@@ -123,14 +123,21 @@ def animate_airframe(time, state_array, airframe_vertices):
 
     frames = [render_aircraft_frame(state, airframe_vertices) for state in state_series]
 
+    min_x = state_array[0].min() - 10
+    max_x = state_array[0].max() + 10
+    min_y = state_array[1].min() - 10
+    max_y = state_array[1].max() + 10
+    min_z = state_array[2].min() - 10
+    max_z = state_array[2].max() + 10
+
     body_animation = go.Figure(
         data=[frames[0]],
         layout=go.Layout(
             title="Aircraft Animation",
             scene=dict(
-                xaxis=dict(range=[-50, 50], autorange=False),
-                yaxis=dict(range=[0, 100], autorange=False),
-                zaxis=dict(range=[50, 150], autorange=False),
+                xaxis=dict(range=[min_x, max_x], autorange=False),
+                yaxis=dict(range=[min_y, max_y], autorange=False),
+                zaxis=dict(range=[min_z, max_z], autorange=False),
                 aspectratio_x=1,
                 aspectratio_y=1,
                 aspectratio_z=1,
