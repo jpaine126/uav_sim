@@ -57,8 +57,8 @@ airframe = Airframe(params, body_vertices)
 
 def wrapper(t, y):
     state = State(t, y[0:3], y[3:6], y[6:9], y[9:12])
-    forces = np.array([0, 0, 0])
-    moments = np.array([1, 0, 0])
+    forces = np.array([0, 0, 1])
+    moments = np.array([0, 0, 0])
     out = airframe.derivative(state, forces, moments)
 
     return out
@@ -66,7 +66,7 @@ def wrapper(t, y):
 
 if __name__ == "__main__":
 
-    t = np.arange(0, 10, 0.001)
+    t = np.arange(0, 10, 0.1)
 
     a = solve_ivp(
         wrapper,
@@ -77,7 +77,7 @@ if __name__ == "__main__":
         t_eval=t,
     )
 
-    plot_state(a.t, a.y).show()
+    plot_state(a.t, a.y.T).show()
 
     body_animation = animate_airframe(a.t, a.y, airframe.body_vertices)
 

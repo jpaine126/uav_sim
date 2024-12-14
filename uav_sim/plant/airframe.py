@@ -4,14 +4,18 @@ import numpy as np
 
 from ..core.abc import Dynamic
 from ..core.state import Control, State
+from ..core.utilities import rotate_body_to_inertial, rotate_inertial_to_body
+
+def rad_to_deg(rad):
+    return rad*(180/np.pi)
 
 
 def CD(alpha, P):
-    return P.C_D_p + (P.C_L_0 + P.C_L_alpha * alpha) ** 2 / (np.pi * P.e * P.AR)
+    return P.C_D_p + (((P.C_L_0 + P.C_L_alpha * rad_to_deg(alpha)) ** 2) / (np.pi * P.e * P.AR))
 
 
 def CL(alpha, P):
-    return (1 - sigma(alpha, P)) * (P.C_L_0 + P.C_L_alpha * alpha) + sigma(alpha, P) * (
+    return (1 - sigma(alpha, P)) * (P.C_L_0 + P.C_L_alpha * rad_to_deg(alpha)) + sigma(alpha, P) * (
         2 * np.sign(alpha) * np.sin(alpha) ** 2 * np.cos(alpha)
     )
 
@@ -92,15 +96,8 @@ class Airframe(Dynamic):
         sp = np.sin(phi)
         tt = np.tan(theta)
 
-        # p_n_dot, p_e_dot, p_d_dot
-        R1 = np.array(
-            [
-                [ct * cu, sp * st * cu - cp * su, cp * st * cu + sp * su],
-                [ct * su, sp * st * su + cp * cu, cp * st * su - sp * cu],
-                [-st, sp * ct, cp * ct],
-            ]
-        )
-        x_dot[0:3] = R1 @ x.velocity
+
+        x_dot[0:3] = rotate_body_to_inertial(x.angle, x.velocity)
 
         # u_dot, v_dot, w_dot
         x_dot[3:6] = np.array([r * v - q * w, p * w - r * u, q * u - p * v]) + (
@@ -121,121 +118,6 @@ class Airframe(Dynamic):
         )
 
         return x_dot
-
-    def trimmed_output(
-        self, airspeed, flight_path_angle, radius, attack, sideslip, roll
-    ):
-        """Compute trimmmed output for given conditions.
-        
-        Returns a State so that the output can be used in other airframe functions,
-        but is not a complete state. Yaw and position are not actually calculated
-        becuase they are not needed for trim calculations.
-        """
-        P = self.P
-        u_star = airspeed * np.cos(attack) * np.cos(sideslip)
-        v_star = airspeed * np.sin(sideslip)
-        w_star = airspeed * np.sin(attack) * np.cos(sideslip)
-
-        pitch = attack + flight_path_angle
-        yaw = np.nan
-
-        yaw_dot = airspeed / radius
-
-        p_star = -yaw_dot * np.sin(pitch)
-        q_star = yaw_dot * np.sin(roll) * np.cos(pitch)
-        r_star = yaw_dot * np.cos(roll) * np.cos(pitch)
-
-        state_star = State(
-            time=np.nan,
-            position=np.array([np.nan, np.nan, np.nan]),
-            velocity=np.array([u_star, v_star, w_star]),
-            angle=np.array([roll, pitch, yaw]),
-            angle_rate=np.array([p_star, q_star, r_star]),
-        )
-
-        delta_e_star = (
-            (
-                (P.Jxz * (p_star ** 2 - r_star ** 2) + (P.Jx - P.Jz) * p_star * r_star)
-                / (1 / 2)
-                * P.rho
-                * airspeed ** 2
-                * P.c
-                * P.S_wing
-            )
-            - P.C_m_0
-            - P.C_m_alpha * attack
-            - P.C_m_q * ((P.c * q_star) / 2 * airspeed)
-        ) / P.C_m_delta_e
-
-        delta_t_star = np.sqrt(
-            np.abs(
-                (
-                    (
-                        2
-                        * P.mass
-                        * (
-                            -r_star * v_star
-                            + q_star * w_star
-                            + P.gravity * np.sin(pitch)
-                        )
-                        - (
-                            P.rho
-                            * (airspeed ** 2)
-                            * P.S_wing
-                            * (
-                                CX(attack, P)
-                                + CXq(attack, P) * ((P.c * q_star) / (2 * airspeed))
-                                + CXde(attack, P) * delta_e_star
-                            )
-                        )
-                    )
-                    / (P.rho * P.S_prop * P.C_prop * (P.k_motor ** 2))
-                )
-                + ((airspeed ** 2) / (P.k_motor ** 2))
-            )
-        )
-        if np.isnan(delta_t_star):
-            ...  # delta_t_star = 0
-            breakpoint()
-
-        delta_a_star, delta_r_star = np.linalg.inv(
-            np.array([[P.C_p_delta_a, P.C_p_delta_r], [P.C_r_delta_a, P.C_r_delta_r],])
-        ) @ np.array(
-            [
-                (
-                    (
-                        (-P.gamma_1 * p_star * q_star + P.gamma_2 * q_star * r_star)
-                        / (1 / 2)
-                        * P.rho
-                        * airspeed ** 2
-                        * P.S_wing
-                        * P.b
-                    )
-                    - P.C_p_0
-                    - P.C_p_beta * sideslip
-                    - P.C_p_p * (P.b * p_star / 2 * airspeed)
-                    - P.C_p_r * (P.b * r_star / 2 * airspeed)
-                ),
-                (
-                    (
-                        (-P.gamma_7 * p_star * q_star + P.gamma_1 * q_star * r_star)
-                        / (1 / 2)
-                        * P.rho
-                        * airspeed ** 2
-                        * P.S_wing
-                        * P.b
-                    )
-                    - P.C_r_0
-                    - P.C_r_beta * sideslip
-                    - P.C_r_p * (P.b * p_star / 2 * airspeed)
-                    - P.C_r_r * (P.b * r_star / 2 * airspeed)
-                ),
-            ]
-        )
-
-        control_star = Control(delta_e_star, delta_r_star, delta_a_star, delta_t_star)
-
-        return state_star, control_star
 
     def get_airspeed_alpha_beta(self, x: State, control: Control, wind: np.ndarray):
         P = self.P
@@ -264,35 +146,10 @@ class Airframe(Dynamic):
         v_wg = wind[4]  # gust along body y-axis
         w_wg = wind[5]  # gust along body z-axis
 
-        # compute wind data in NED
-        ct = np.cos(theta)
-        cu = np.cos(psi)
-        cp = np.cos(phi)
-        st = np.sin(theta)
-        su = np.sin(psi)
-        sp = np.sin(phi)
-        #     t = tan(theta)
-        R1 = np.array(
-            [
-                [ct * cu, sp * st * cu - cp * su, cp * st * cu + sp * su],
-                [ct * su, sp * st * su + cp * cu, cp * st * su - sp * cu],
-                [-st, sp * ct, cp * ct],
-            ]
-        )
-
-        # body to vehicle
-        R2 = R1.T
-        # vehicle to body
-
-        # compute wind data in NED
-        w_NED = (R1 @ np.array([u_wg, v_wg, w_wg])) + np.array([w_ns, w_es, w_ds])
-
-        w_n = w_NED[0]
-        w_e = w_NED[1]
-        w_d = w_NED[2]
-
         # compute air data
-        V_bw = (R2 @ np.array([w_ns, w_es, w_ds])) + np.array([u_wg, v_wg, w_wg])
+        V_bw = rotate_inertial_to_body(
+            x.angle, np.array([w_ns, w_es, w_ds])
+        ) + np.array([u_wg, v_wg, w_wg])
 
         u_w = V_bw[0]
         v_w = V_bw[1]
@@ -305,7 +162,7 @@ class Airframe(Dynamic):
         w_r = V_ba[2]
 
         Va = np.sqrt(u_r ** 2 + v_r ** 2 + w_r ** 2)
-        alpha = np.arctan((w_r) / (u_r))
+        alpha = np.arctan2(w_r, u_r)
         beta = np.arcsin(v_r / Va)
 
         return Va, alpha, beta
@@ -374,8 +231,7 @@ class Airframe(Dynamic):
             )
             + ((1 / 2) * P.rho * P.S_prop * P.C_prop * ((P.k_motor * delta_t) ** 2))
         )
-        # if np.isnan(f1):
-        #     breakpoint()
+
         f2 = (P.mass * P.gravity * ct * sp) + (
             ((1 / 2) * P.rho * (airspeed ** 2) * P.S_wing)
             * (
