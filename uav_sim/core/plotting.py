@@ -41,40 +41,88 @@ def plot_state(t, y):
 
     # Make plots
     fig.add_scatter(
-        x=t, y=y[:, 0], row=1, col=1, name="North",
+        x=t,
+        y=y[:, 0],
+        row=1,
+        col=1,
+        name="North",
     )
     fig.add_scatter(
-        x=t, y=y[:, 1], row=2, col=1, name="East",
+        x=t,
+        y=y[:, 1],
+        row=2,
+        col=1,
+        name="East",
     )
     fig.add_scatter(
-        x=t, y=y[:, 2], row=3, col=1, name="Up",
+        x=t,
+        y=y[:, 2],
+        row=3,
+        col=1,
+        name="Up",
     )
     fig.add_scatter(
-        x=t, y=y[:, 3], row=1, col=2, name="Velocity North",
+        x=t,
+        y=y[:, 3],
+        row=1,
+        col=2,
+        name="Velocity North",
     )
     fig.add_scatter(
-        x=t, y=y[:, 4], row=2, col=2, name="Velocity East",
+        x=t,
+        y=y[:, 4],
+        row=2,
+        col=2,
+        name="Velocity East",
     )
     fig.add_scatter(
-        x=t, y=y[:, 5], row=3, col=2, name="Velocity Down",
+        x=t,
+        y=y[:, 5],
+        row=3,
+        col=2,
+        name="Velocity Down",
     )
     fig.add_scatter(
-        x=t, y=y[:, 6], row=4, col=1, name="Phi",
+        x=t,
+        y=y[:, 6],
+        row=4,
+        col=1,
+        name="Phi",
     )
     fig.add_scatter(
-        x=t, y=y[:, 7], row=5, col=1, name="Theta",
+        x=t,
+        y=y[:, 7],
+        row=5,
+        col=1,
+        name="Theta",
     )
     fig.add_scatter(
-        x=t, y=y[:, 8], row=6, col=1, name="Psi",
+        x=t,
+        y=y[:, 8],
+        row=6,
+        col=1,
+        name="Psi",
     )
     fig.add_scatter(
-        x=t, y=y[:, 9], row=4, col=2, name="Phi dot",
+        x=t,
+        y=y[:, 9],
+        row=4,
+        col=2,
+        name="Phi dot",
     )
     fig.add_scatter(
-        x=t, y=y[:, 10], row=5, col=2, name="Theta dot",
+        x=t,
+        y=y[:, 10],
+        row=5,
+        col=2,
+        name="Theta dot",
     )
     fig.add_scatter(
-        x=t, y=y[:, 11], row=6, col=2, name="Psi dot",
+        x=t,
+        y=y[:, 11],
+        row=6,
+        col=2,
+        name="Psi dot",
     )
 
     return fig
@@ -97,16 +145,32 @@ def plot_control(t, y):
 
     # Make plots
     fig.add_scatter(
-        x=t, y=y[:, 0], row=1, col=1, name="Elevator",
+        x=t,
+        y=y[:, 0],
+        row=1,
+        col=1,
+        name="Elevator",
     )
     fig.add_scatter(
-        x=t, y=y[:, 1], row=2, col=1, name="Rudder",
+        x=t,
+        y=y[:, 1],
+        row=2,
+        col=1,
+        name="Rudder",
     )
     fig.add_scatter(
-        x=t, y=y[:, 2], row=1, col=2, name="Aileron",
+        x=t,
+        y=y[:, 2],
+        row=1,
+        col=2,
+        name="Aileron",
     )
     fig.add_scatter(
-        x=t, y=y[:, 3], row=2, col=2, name="Thrust",
+        x=t,
+        y=y[:, 3],
+        row=2,
+        col=2,
+        name="Thrust",
     )
 
     return fig
@@ -116,7 +180,11 @@ def body_to_ned(point, state: State):
     """Convert point from body frame to north-east-down."""
     phi, theta, psi = state.angle
     R_roll = np.array(
-        [[1, 0, 0], [0, np.cos(phi), -np.sin(phi)], [0, np.sin(phi), np.cos(phi)],]
+        [
+            [1, 0, 0],
+            [0, np.cos(phi), -np.sin(phi)],
+            [0, np.sin(phi), np.cos(phi)],
+        ]
     )
     R_pitch = np.array(
         [
@@ -126,7 +194,11 @@ def body_to_ned(point, state: State):
         ]
     )
     R_yaw = np.array(
-        [[np.cos(psi), -np.sin(psi), 0], [np.sin(psi), np.cos(psi), 0], [0, 0, 1],]
+        [
+            [np.cos(psi), -np.sin(psi), 0],
+            [np.sin(psi), np.cos(psi), 0],
+            [0, 0, 1],
+        ]
     )
     R = R_roll @ R_pitch @ R_yaw
     ned = R @ point
@@ -136,7 +208,13 @@ def body_to_ned(point, state: State):
 
 def ned_to_enu(point):
     """Convert point from north-east-down to east-north-up."""
-    R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1],])
+    R = np.array(
+        [
+            [0, 1, 0],
+            [1, 0, 0],
+            [0, 0, -1],
+        ]
+    )
     enu = R @ point
     return enu
 
@@ -151,7 +229,10 @@ def render_aircraft_frame(state, body_vertices):
     )
 
     trace = go.Mesh3d(
-        x=points_enu[:, 0], y=points_enu[:, 1], z=points_enu[:, 2], color="blue",
+        x=points_enu[:, 0],
+        y=points_enu[:, 1],
+        z=points_enu[:, 2],
+        color="blue",
     )
 
     return trace
@@ -195,7 +276,10 @@ def animate_airframe(time, state_array, airframe_vertices):
                             method="animate",
                             args=[
                                 None,
-                                {"frame": {"duration": 10}, "fromcurrent": True,},
+                                {
+                                    "frame": {"duration": 10},
+                                    "fromcurrent": True,
+                                },
                             ],
                         ),
                         dict(
@@ -203,7 +287,10 @@ def animate_airframe(time, state_array, airframe_vertices):
                             method="animate",
                             args=[
                                 [None],
-                                {"frame": {"duration": 0}, "mode": "immediate",},
+                                {
+                                    "frame": {"duration": 0},
+                                    "mode": "immediate",
+                                },
                             ],
                         ),
                     ],

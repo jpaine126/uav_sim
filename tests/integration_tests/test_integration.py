@@ -1,7 +1,7 @@
 import numpy as np
 import pytest
 from scipy.integrate import solve_ivp
-
+from uav_sim.core import utilities
 from uav_sim.core.state import Control, State
 from uav_sim.plant.airframe import Airframe
 from uav_sim.setup import body_vertices, params
@@ -10,14 +10,6 @@ from uav_sim.setup import body_vertices, params
 @pytest.fixture
 def airframe():
     return Airframe(params, body_vertices)
-
-
-# =============================================================================
-# Integration & Numerical Propagation Tests
-# =============================================================================
-
-
-from uav_sim.core import utilities
 
 
 class TestBallisticEnergyConservation:
@@ -49,12 +41,14 @@ class TestBallisticEnergyConservation:
         sol = solve_ivp(
             wrapper,
             t_span=t_span,
-            y0=np.hstack((
-                initial_state.position,
-                initial_state.velocity,
-                initial_state.angle,
-                initial_state.angle_rate,
-            )),
+            y0=np.hstack(
+                (
+                    initial_state.position,
+                    initial_state.velocity,
+                    initial_state.angle,
+                    initial_state.angle_rate,
+                )
+            ),
             t_eval=t_eval,
             dense_output=True,
         )
@@ -65,7 +59,7 @@ class TestBallisticEnergyConservation:
         # h = -pd  (height above origin)
         heights = -positions[:, 2]
         potential = params.mass * params.gravity * heights
-        kinetic = 0.5 * params.mass * np.sum(velocities ** 2, axis=1)
+        kinetic = 0.5 * params.mass * np.sum(velocities**2, axis=1)
         total_energy = potential + kinetic
 
         # Energy should be conserved to within solver tolerance
@@ -94,12 +88,14 @@ class TestBallisticEnergyConservation:
         sol = solve_ivp(
             wrapper,
             t_span=(0, 2.0),
-            y0=np.hstack((
-                initial_state.position,
-                initial_state.velocity,
-                initial_state.angle,
-                initial_state.angle_rate,
-            )),
+            y0=np.hstack(
+                (
+                    initial_state.position,
+                    initial_state.velocity,
+                    initial_state.angle,
+                    initial_state.angle_rate,
+                )
+            ),
             t_eval=np.linspace(0, 2, 200),
         )
 
@@ -125,8 +121,8 @@ class TestKinematicVerification:
         forces = np.zeros(3)
         moments = np.zeros(3)
         x_dot = airframe.derivative(state, forces, moments)
-        np.testing.assert_allclose(x_dot[6], 0, atol=1e-10)   # phi_dot
-        np.testing.assert_allclose(x_dot[7], 0, atol=1e-10)   # theta_dot
+        np.testing.assert_allclose(x_dot[6], 0, atol=1e-10)  # phi_dot
+        np.testing.assert_allclose(x_dot[7], 0, atol=1e-10)  # theta_dot
         np.testing.assert_allclose(x_dot[8], 0.5, atol=1e-10)  # psi_dot
 
     def test_steady_climb_kinematics(self, airframe):
@@ -180,13 +176,16 @@ class TestTrimSolver:
         )
 
         u, v, w = trim_state.velocity
-        Va_calc = np.sqrt(u ** 2 + v ** 2 + w ** 2)
+        Va_calc = np.sqrt(u**2 + v**2 + w**2)
         alpha_calc = np.arctan2(w, u)
         beta_calc = np.arcsin(v / Va_calc) if Va_calc > 0 else 0.0
 
         forces, moments, *_ = airframe.forces_moments(
-            trim_state, trim_control,
-            airspeed=Va_calc, alpha=alpha_calc, beta=beta_calc,
+            trim_state,
+            trim_control,
+            airspeed=Va_calc,
+            alpha=alpha_calc,
+            beta=beta_calc,
         )
         derivatives = airframe.derivative(trim_state, forces, moments)
 
@@ -206,13 +205,16 @@ class TestTrimSolver:
         )
 
         u, v, w = trim_state.velocity
-        Va_calc = np.sqrt(u ** 2 + v ** 2 + w ** 2)
+        Va_calc = np.sqrt(u**2 + v**2 + w**2)
         alpha_calc = np.arctan2(w, u)
         beta_calc = np.arcsin(v / Va_calc) if Va_calc > 1e-6 else 0.0
 
         forces, moments, *_ = airframe.forces_moments(
-            trim_state, trim_control,
-            airspeed=Va_calc, alpha=alpha_calc, beta=beta_calc,
+            trim_state,
+            trim_control,
+            airspeed=Va_calc,
+            alpha=alpha_calc,
+            beta=beta_calc,
         )
         derivatives = airframe.derivative(trim_state, forces, moments)
 
@@ -236,13 +238,16 @@ class TestTrimSolver:
         )
 
         u, v, w = trim_state.velocity
-        Va_calc = np.sqrt(u ** 2 + v ** 2 + w ** 2)
+        Va_calc = np.sqrt(u**2 + v**2 + w**2)
         alpha_calc = np.arctan2(w, u)
         beta_calc = np.arcsin(v / Va_calc) if Va_calc > 1e-6 else 0.0
 
         forces, moments, *_ = airframe.forces_moments(
-            trim_state, trim_control,
-            airspeed=Va_calc, alpha=alpha_calc, beta=beta_calc,
+            trim_state,
+            trim_control,
+            airspeed=Va_calc,
+            alpha=alpha_calc,
+            beta=beta_calc,
         )
         derivatives = airframe.derivative(trim_state, forces, moments)
 
@@ -278,12 +283,14 @@ class TestOpenLoopTrimStability:
         sol = solve_ivp(
             wrapper,
             t_span=(0, 5.0),
-            y0=np.hstack((
-                trim_state.position,
-                trim_state.velocity,
-                trim_state.angle,
-                trim_state.angle_rate,
-            )),
+            y0=np.hstack(
+                (
+                    trim_state.position,
+                    trim_state.velocity,
+                    trim_state.angle,
+                    trim_state.angle_rate,
+                )
+            ),
             t_eval=np.linspace(0, 5, 500),
         )
 

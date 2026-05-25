@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from scipy.integrate import solve_ivp
-
 from uav_sim.core.state import State
 from uav_sim.plant.airframe import Airframe
 from uav_sim.setup import body_vertices, params
@@ -116,12 +115,14 @@ class TestTrimOpenLoopStability:
         return solve_ivp(
             wrapper,
             t_span=t_span,
-            y0=np.hstack((
-                trim_state.position,
-                trim_state.velocity,
-                trim_state.angle,
-                trim_state.angle_rate,
-            )),
+            y0=np.hstack(
+                (
+                    trim_state.position,
+                    trim_state.velocity,
+                    trim_state.angle,
+                    trim_state.angle_rate,
+                )
+            ),
             t_eval=np.linspace(*t_span, 500),
         )
 
@@ -173,13 +174,11 @@ class TestTrimOpenLoopStability:
         )
 
         period = 2 * np.pi * R / 10.0  # one orbit in seconds
-        sol = self._propagate_from_trim(
-            airframe, trim_state, trim_control, (0, period)
-        )
+        sol = self._propagate_from_trim(airframe, trim_state, trim_control, (0, period))
 
         # After one orbit the lateral position should be close to the start
         delta_n = sol.y[0, -1] - sol.y[0, 0]
         delta_e = sol.y[1, -1] - sol.y[1, 0]
-        assert np.sqrt(delta_n ** 2 + delta_e ** 2) < 10.0, (
+        assert np.sqrt(delta_n**2 + delta_e**2) < 10.0, (
             f"Orbit did not close: N error={delta_n:.2f}, E error={delta_e:.2f}"
         )

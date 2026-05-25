@@ -1,7 +1,6 @@
 import numpy as np
 import pytest
 from scipy.spatial.transform import Rotation as R
-
 from uav_sim.core import utilities
 
 # =============================================================================
@@ -49,12 +48,8 @@ class TestEulerToDcm:
         # transpose of scipy's R_b^i (body->inertial)
         # We use transpose(2,1,0) to swap within each (3x3) slice while
         # bringing the batch dimension to the back
-        expected = (
-            R.from_euler("xyz", angles).as_matrix().transpose(2, 1, 0)
-        )
-        actual = utilities.euler_to_dcm(
-            angles[:, 0], angles[:, 1], angles[:, 2]
-        )
+        expected = R.from_euler("xyz", angles).as_matrix().transpose(2, 1, 0)
+        actual = utilities.euler_to_dcm(angles[:, 0], angles[:, 1], angles[:, 2])
         np.testing.assert_allclose(actual, expected, atol=1e-10)
 
 
@@ -143,27 +138,33 @@ class TestRotateBodyToInertial:
 class TestRoundTrip:
     """Inertial->Body->Inertial and Body->Inertial->Body must return identity."""
 
-    @pytest.mark.parametrize("angle", [
-        np.array([0, 0, 0]),
-        np.array([np.pi / 4, 0, 0]),
-        np.array([0, np.pi / 6, 0]),
-        np.array([0, 0, np.pi / 3]),
-        np.array([0.3, 0.5, -0.7]),
-        np.array([1.2, -0.8, 0.4]),
-    ])
+    @pytest.mark.parametrize(
+        "angle",
+        [
+            np.array([0, 0, 0]),
+            np.array([np.pi / 4, 0, 0]),
+            np.array([0, np.pi / 6, 0]),
+            np.array([0, 0, np.pi / 3]),
+            np.array([0.3, 0.5, -0.7]),
+            np.array([1.2, -0.8, 0.4]),
+        ],
+    )
     def test_inertial_to_body_to_inertial(self, angle):
         vec_i = np.array([1.0, 2.0, 3.0])
         vec_b = utilities.rotate_inertial_to_body(angle, vec_i)
         vec_i_back = utilities.rotate_body_to_inertial(angle, vec_b)
         np.testing.assert_allclose(vec_i_back, vec_i, atol=1e-10)
 
-    @pytest.mark.parametrize("angle", [
-        np.array([0, 0, 0]),
-        np.array([np.pi / 4, 0, 0]),
-        np.array([0, np.pi / 6, 0]),
-        np.array([0, 0, np.pi / 3]),
-        np.array([0.3, 0.5, -0.7]),
-    ])
+    @pytest.mark.parametrize(
+        "angle",
+        [
+            np.array([0, 0, 0]),
+            np.array([np.pi / 4, 0, 0]),
+            np.array([0, np.pi / 6, 0]),
+            np.array([0, 0, np.pi / 3]),
+            np.array([0.3, 0.5, -0.7]),
+        ],
+    )
     def test_body_to_inertial_to_body(self, angle):
         vec_b = np.array([-2.0, 5.0, 1.0])
         vec_i = utilities.rotate_body_to_inertial(angle, vec_b)

@@ -19,7 +19,7 @@ def get_params():
     k_T_P = 0
     k_Omega = 0
     e = 0.9
-    AR = b ** 2 / S_wing
+    AR = b**2 / S_wing
 
     C_L_0 = 0.28
     C_L_alpha = 3.45
@@ -57,14 +57,14 @@ def get_params():
     epsilon = 0.1592
     alpha0 = 0.4712
 
-    gamma = Jx * Jz - Jxz ** 2
+    gamma = Jx * Jz - Jxz**2
     gamma_1 = (Jxz * (Jx - Jy + Jz)) / gamma
-    gamma_2 = (Jz * (Jz - Jy) + Jxz ** 2) / gamma
+    gamma_2 = (Jz * (Jz - Jy) + Jxz**2) / gamma
     gamma_3 = Jz / gamma
     gamma_4 = Jxz / gamma
     gamma_5 = (Jz - Jx) / Jy
     gamma_6 = Jxz / Jy
-    gamma_7 = ((Jx - Jy) * Jx + Jxz ** 2) / gamma
+    gamma_7 = ((Jx - Jy) * Jx + Jxz**2) / gamma
     gamma_8 = Jx / gamma
 
     C_p_0 = gamma_3 * C_ell_0 + gamma_4 * C_n_0

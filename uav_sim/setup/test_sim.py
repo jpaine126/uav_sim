@@ -12,9 +12,7 @@ def run_sim_open_loop(initial_state: State, control: Control):
 
     def wrapper(t, y):
         state = State(t, y[0:3], y[3:6], y[6:9], y[9:12])
-        forces, moments, *_ = airframe.forces_moments(
-            state, control, wind=initial_wind
-        )
+        forces, moments, *_ = airframe.forces_moments(state, control, wind=initial_wind)
         out = airframe.derivative(state, forces, moments)
         return out
 
@@ -22,7 +20,12 @@ def run_sim_open_loop(initial_state: State, control: Control):
         wrapper,
         t_span=(t.min(), t.max()),
         y0=np.hstack(
-            (initial_state.position, initial_state.velocity, initial_state.angle, initial_state.angle_rate)
+            (
+                initial_state.position,
+                initial_state.velocity,
+                initial_state.angle,
+                initial_state.angle_rate,
+            )
         ),
         t_eval=t,
     )

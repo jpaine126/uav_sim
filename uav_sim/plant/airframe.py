@@ -6,18 +6,21 @@ from ..core.abc import Dynamic
 from ..core.state import Control, State
 from ..core.utilities import rotate_body_to_inertial, rotate_inertial_to_body
 
+
 def rad_to_deg(rad):
-    return rad*(180/np.pi)
+    return rad * (180 / np.pi)
 
 
 def CD(alpha, P):
-    return P.C_D_p + (((P.C_L_0 + P.C_L_alpha * rad_to_deg(alpha)) ** 2) / (np.pi * P.e * P.AR))
+    return P.C_D_p + (
+        ((P.C_L_0 + P.C_L_alpha * rad_to_deg(alpha)) ** 2) / (np.pi * P.e * P.AR)
+    )
 
 
 def CL(alpha, P):
-    return (1 - sigma(alpha, P)) * (P.C_L_0 + P.C_L_alpha * rad_to_deg(alpha)) + sigma(alpha, P) * (
-        2 * np.sign(alpha) * np.sin(alpha) ** 2 * np.cos(alpha)
-    )
+    return (1 - sigma(alpha, P)) * (P.C_L_0 + P.C_L_alpha * rad_to_deg(alpha)) + sigma(
+        alpha, P
+    ) * (2 * np.sign(alpha) * np.sin(alpha) ** 2 * np.cos(alpha))
 
 
 def sigma(alpha, P):
@@ -59,8 +62,7 @@ class Airframe(Dynamic):
         self.P = P
         self.body_vertices = body_vertices
 
-    def update(self):
-        ...
+    def update(self): ...
 
     def derivative(self, x: State, forces, moments):
         """Calculate the derivatives of the airframe equations of motion."""
@@ -96,7 +98,6 @@ class Airframe(Dynamic):
         sp = np.sin(phi)
         tt = np.tan(theta)
 
-
         x_dot[0:3] = rotate_body_to_inertial(x.angle, x.velocity)
 
         # u_dot, v_dot, w_dot
@@ -112,7 +113,7 @@ class Airframe(Dynamic):
         x_dot[9] = (
             P.gamma_1 * p * q - P.gamma_2 * q * r + P.gamma_3 * ell + P.gamma_4 * n
         )
-        x_dot[10] = P.gamma_5 * p * r - P.gamma_6 * (p ** 2 - r ** 2) + m / P.Jy
+        x_dot[10] = P.gamma_5 * p * r - P.gamma_6 * (p**2 - r**2) + m / P.Jy
         x_dot[11] = (
             P.gamma_7 * p * q - P.gamma_1 * q * r + P.gamma_4 * ell + P.gamma_8 * n
         )
@@ -161,7 +162,7 @@ class Airframe(Dynamic):
         v_r = V_ba[1]
         w_r = V_ba[2]
 
-        Va = np.sqrt(u_r ** 2 + v_r ** 2 + w_r ** 2)
+        Va = np.sqrt(u_r**2 + v_r**2 + w_r**2)
         alpha = np.arctan2(w_r, u_r)
         beta = np.arcsin(v_r / Va)
 
@@ -222,7 +223,7 @@ class Airframe(Dynamic):
         f1 = (
             -P.mass * P.gravity * st
             + (
-                ((1 / 2) * P.rho * (airspeed ** 2) * P.S_wing)
+                ((1 / 2) * P.rho * (airspeed**2) * P.S_wing)
                 * (
                     CX(alpha, P)
                     + CXq(alpha, P) * (P.c * q) / (2 * airspeed)
@@ -233,7 +234,7 @@ class Airframe(Dynamic):
         )
 
         f2 = (P.mass * P.gravity * ct * sp) + (
-            ((1 / 2) * P.rho * (airspeed ** 2) * P.S_wing)
+            ((1 / 2) * P.rho * (airspeed**2) * P.S_wing)
             * (
                 P.C_Y_0
                 + P.C_Y_beta * beta
@@ -244,7 +245,7 @@ class Airframe(Dynamic):
             )
         )
         f3 = (P.mass * P.gravity * ct * cp) + (
-            ((1 / 2) * P.rho * airspeed ** 2 * P.S_wing)
+            ((1 / 2) * P.rho * airspeed**2 * P.S_wing)
             * (
                 CZ(alpha, P)
                 + CZq(alpha, P) * (P.c * q) / (2 * airspeed)
@@ -254,7 +255,7 @@ class Airframe(Dynamic):
 
         Force = np.array([f1, f2, f3])
 
-        t1 = ((1 / 2) * P.rho * airspeed ** 2 * P.S_wing) * (
+        t1 = ((1 / 2) * P.rho * airspeed**2 * P.S_wing) * (
             P.b
             * (
                 P.C_ell_0
@@ -265,7 +266,7 @@ class Airframe(Dynamic):
                 + P.C_ell_delta_r * delta_r
             )
         ) - (P.k_T_P * (P.k_Omega * delta_t) ** 2)
-        t2 = ((1 / 2) * P.rho * airspeed ** 2 * P.S_wing) * (
+        t2 = ((1 / 2) * P.rho * airspeed**2 * P.S_wing) * (
             P.c
             * (
                 P.C_m_0
@@ -274,7 +275,7 @@ class Airframe(Dynamic):
                 + P.C_m_delta_e * delta_e
             )
         )
-        t3 = ((1 / 2) * P.rho * airspeed ** 2 * P.S_wing) * (
+        t3 = ((1 / 2) * P.rho * airspeed**2 * P.S_wing) * (
             P.b
             * (
                 P.C_n_0

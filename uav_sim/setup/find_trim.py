@@ -1,14 +1,13 @@
 """Compute trim conditions for steady state flight given a desired air speed and
 flight path angle using a numerical optimizer over the full trim state."""
 
-
 import numpy as np
 from scipy.optimize import minimize
 
 from ..core.state import Control, State
+from ..core.utilities import rotate_body_to_inertial
 from ..plant.airframe import Airframe
 from . import body_vertices, params
-from ..core.utilities import rotate_body_to_inertial
 
 airframe = Airframe(params, body_vertices)
 
@@ -19,9 +18,7 @@ def _compute_initial_guess(Va: float, gamma: float, R: float):
     P = params
 
     # Desired CL for lift = weight * cos(gamma)
-    CL_eq = P.mass * P.gravity * np.cos(gamma) / (
-        0.5 * P.rho * Va ** 2 * P.S_wing
-    )
+    CL_eq = P.mass * P.gravity * np.cos(gamma) / (0.5 * P.rho * Va**2 * P.S_wing)
 
     # Solve CL(alpha) = CL_eq for small alpha where sigma ≈ 0
     # CL ≈ C_L_0 + C_L_alpha * alpha_deg  (alpha in degrees)
@@ -32,29 +29,37 @@ def _compute_initial_guess(Va: float, gamma: float, R: float):
     if np.isinf(R):
         phi_guess = 0.0
     else:
-        phi_guess = np.arctan(Va ** 2 / (P.gravity * R))
+        phi_guess = np.arctan(Va**2 / (P.gravity * R))
 
     # Approximate pitching moment balance -> elevator
     theta_guess = alpha_guess - gamma
     delta_e_guess = -(P.C_m_0 + P.C_m_alpha * alpha_guess) / P.C_m_delta_e
 
     # Approximate drag polar for thrust balance
-    CD_approx = P.C_D_p + CL_eq ** 2 / (np.pi * P.e * P.AR)
-    drag = 0.5 * P.rho * Va ** 2 * P.S_wing * CD_approx
+    CD_approx = P.C_D_p + CL_eq**2 / (np.pi * P.e * P.AR)
+    drag = 0.5 * P.rho * Va**2 * P.S_wing * CD_approx
     # Thrust must also counter the along-track gravity component
     thrust_needed = drag + P.mass * P.gravity * np.sin(gamma)
     if thrust_needed > 0:
         # T = 0.5 * rho * S_prop * C_prop * (k_motor * delta_t)^2
         # => delta_t = sqrt(2*T / (rho * S_prop * C_prop * k_motor^2))
-        denom = 0.5 * P.rho * P.S_prop * P.C_prop * (P.k_motor ** 2)
+        denom = 0.5 * P.rho * P.S_prop * P.C_prop * (P.k_motor**2)
         delta_t_guess = np.sqrt(thrust_needed / denom)
     else:
         delta_t_guess = 0.0
 
     # Rudder, aileron start at zero
-    return np.array([
-        alpha_guess, 0.0, phi_guess, delta_e_guess, 0.0, 0.0, delta_t_guess,
-    ])
+    return np.array(
+        [
+            alpha_guess,
+            0.0,
+            phi_guess,
+            delta_e_guess,
+            0.0,
+            0.0,
+            delta_t_guess,
+        ]
+    )
 
 
 def find_trim(
@@ -144,10 +149,10 @@ def find_trim(
         (-np.deg2rad(15), np.deg2rad(20)),  # alpha
         (-np.deg2rad(10), np.deg2rad(10)),  # beta
         (-np.deg2rad(45), np.deg2rad(45)),  # phi
-        (-1.0, 1.0),                        # delta_e
-        (-1.0, 1.0),                        # delta_a
-        (-1.0, 1.0),                        # delta_r
-        (0.0, 1.5),                         # delta_t
+        (-1.0, 1.0),  # delta_e
+        (-1.0, 1.0),  # delta_a
+        (-1.0, 1.0),  # delta_r
+        (0.0, 1.5),  # delta_t
     ]
 
     result = minimize(
@@ -195,7 +200,7 @@ if __name__ == "__main__":
     )
 
     u, v, w = trim_state.velocity
-    Va_calc = np.sqrt(u ** 2 + v ** 2 + w ** 2)
+    Va_calc = np.sqrt(u**2 + v**2 + w**2)
     alpha_calc = np.arctan2(w, u)
     beta_calc = np.arcsin(v / Va_calc)
 

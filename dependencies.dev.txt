@@ -6,6 +6,7 @@ pandas
 
 # test
 pytest
+ruff
 
 # build
 hatch

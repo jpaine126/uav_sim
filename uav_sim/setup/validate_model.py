@@ -15,14 +15,14 @@ def get_params():
     Jz = 1.759
     Jxz = 0  # 0.1204
 
-    gamma = Jx * Jz - Jxz ** 2
+    gamma = Jx * Jz - Jxz**2
     gamma_1 = (Jxz * (Jx - Jy + Jz)) / gamma
-    gamma_2 = (Jz * (Jz - Jy) + Jxz ** 2) / gamma
+    gamma_2 = (Jz * (Jz - Jy) + Jxz**2) / gamma
     gamma_3 = Jz / gamma
     gamma_4 = Jxz / gamma
     gamma_5 = (Jz - Jx) / Jy
     gamma_6 = Jxz / Jy
-    gamma_7 = ((Jx - Jy) * Jx + Jxz ** 2) / gamma
+    gamma_7 = ((Jx - Jy) * Jx + Jxz**2) / gamma
     gamma_8 = Jx / gamma
 
     p = type("A", tuple(), {})()
@@ -65,7 +65,6 @@ def wrapper(t, y):
 
 
 if __name__ == "__main__":
-
     t = np.arange(0, 10, 0.1)
 
     a = solve_ivp(

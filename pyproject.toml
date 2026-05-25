@@ -11,3 +11,13 @@ source = "vcs"
 
 [tool.hatch.version.raw-options]
 version_scheme = "no-guess-dev"
+
+[tool.ruff]
+src = [
+    "uav_sim",
+    "tests",
+
+]
+
+[tool.ruff.lint]
+select = ["I", "E"]

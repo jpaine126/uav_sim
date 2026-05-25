@@ -29,8 +29,16 @@ def euler_to_dcm(roll, pitch, yaw):
         return np.array(
             [
                 [c_pitch * c_yaw, c_pitch * s_yaw, -s_pitch],
-                [s_roll * s_pitch * c_yaw - c_roll * s_yaw, s_roll * s_pitch * s_yaw + c_roll * c_yaw, s_roll * c_pitch],
-                [c_roll * s_pitch * c_yaw + s_roll * s_yaw, c_roll * s_pitch * s_yaw - s_roll * c_yaw, c_roll * c_pitch],
+                [
+                    s_roll * s_pitch * c_yaw - c_roll * s_yaw,
+                    s_roll * s_pitch * s_yaw + c_roll * c_yaw,
+                    s_roll * c_pitch,
+                ],
+                [
+                    c_roll * s_pitch * c_yaw + s_roll * s_yaw,
+                    c_roll * s_pitch * s_yaw - s_roll * c_yaw,
+                    c_roll * c_pitch,
+                ],
             ]
         )
     else:
@@ -72,7 +80,7 @@ def rotate_inertial_to_body(angle: np.ndarray, vec: np.ndarray):
 
     # Batch case: pass arrays through to einsum
     R = euler_to_dcm(angle[:, 0], angle[:, 1], angle[:, 2])
-    return np.einsum('ijk,kj->ki', R, vec)
+    return np.einsum("ijk,kj->ki", R, vec)
 
 
 def rotate_body_to_inertial(angle: np.ndarray, vec: np.ndarray):
@@ -99,4 +107,4 @@ def rotate_body_to_inertial(angle: np.ndarray, vec: np.ndarray):
 
     # Batch case: pass arrays through to einsum
     R = euler_to_dcm(angle[:, 0], angle[:, 1], angle[:, 2])
-    return np.einsum('jik,kj->ki', R, vec)
+    return np.einsum("jik,kj->ki", R, vec)

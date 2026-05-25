@@ -32,7 +32,7 @@ class RateGyro(Sensor):
     ):
         self.sample_rate = sample_rate
         self.noise_density = noise_density
-        self.noise_std = noise_density * sample_rate ** 2
+        self.noise_std = noise_density * sample_rate**2
         self.bias = bias
         self.turn_on_bias = turn_on_bias
         self.in_run_bias_rate = in_run_bias_rate

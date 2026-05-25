@@ -19,11 +19,13 @@ class Accelerometer(Sensor):
     """
 
     def __init__(
-        self, sample_rate: float, noise_density: float = 0.0,
+        self,
+        sample_rate: float,
+        noise_density: float = 0.0,
     ):
         self.sample_rate = sample_rate
         self.noise_density = noise_density
-        self.noise_std = noise_density * sample_rate ** 2
+        self.noise_std = noise_density * sample_rate**2
 
     def read(self, state: State):
         """Make a reading."""

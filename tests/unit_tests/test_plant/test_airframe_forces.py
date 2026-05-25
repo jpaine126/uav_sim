@@ -1,9 +1,8 @@
 import numpy as np
 import pytest
 from scipy.integrate import solve_ivp
-
-from uav_sim.core.state import Control, State
 from uav_sim.core import utilities
+from uav_sim.core.state import Control, State
 from uav_sim.plant.airframe import Airframe
 from uav_sim.setup import body_vertices, params
 
@@ -38,7 +37,9 @@ class TestGravityForces:
         np.testing.assert_allclose(g_body, np.array([0, 0, params.gravity]), atol=1e-10)
         # Total external force = mass * g_body
         total_force = params.mass * g_body
-        np.testing.assert_allclose(total_force[2], params.mass * params.gravity, atol=1e-10)
+        np.testing.assert_allclose(
+            total_force[2], params.mass * params.gravity, atol=1e-10
+        )
 
     def test_pitch_90_pitches_gravity_onto_negative_body_x(self, airframe):
         """With pitch=+90 deg (nose up), body x-axis points inertial-up.
@@ -48,7 +49,9 @@ class TestGravityForces:
         g_body = R @ g_ned
         # Gravity now aligns with -body-x (positive down -> negative body-x
         # because body-x points up)
-        np.testing.assert_allclose(g_body, np.array([-params.gravity, 0, 0]), atol=1e-10)
+        np.testing.assert_allclose(
+            g_body, np.array([-params.gravity, 0, 0]), atol=1e-10
+        )
 
     def test_pitch_minus90_pitches_gravity_onto_body_x(self, airframe):
         """With pitch=-90 deg (nose down), body x-axis points inertial-down.
@@ -75,19 +78,19 @@ class TestGravityForces:
         g_ned = np.array([0, 0, params.gravity])
         g_body = R @ g_ned
         # Gravity now aligns with -body-y
-        np.testing.assert_allclose(g_body, np.array([0, -params.gravity, 0]), atol=1e-10)
+        np.testing.assert_allclose(
+            g_body, np.array([0, -params.gravity, 0]), atol=1e-10
+        )
 
     def test_zero_alpha_cx_and_cz_signs(self, airframe):
         """At alpha=0, CZ = -C_L_0.  CX = -C_D_p - C_L_0^2/(pi*e*AR)
         due to the drag-polar term in the aerodynamic model."""
-        from uav_sim.plant.airframe import CX, CZ, CD
+        from uav_sim.plant.airframe import CD, CX, CZ
 
         alpha = 0.0
         # At alpha=0, CL(0) = C_L_0 and CD(0) contains the drag-polar
         # term C_L_0^2 / (pi * e * AR)
-        expected_cd0 = params.C_D_p + (params.C_L_0 ** 2) / (
-            np.pi * params.e * params.AR
-        )
+        expected_cd0 = params.C_D_p + (params.C_L_0**2) / (np.pi * params.e * params.AR)
         expected_cx = -expected_cd0
         expected_cz = -params.C_L_0
         np.testing.assert_allclose(CX(alpha, params), expected_cx, atol=1e-10)
@@ -268,4 +271,3 @@ class TestAngularRateKinematics:
         np.testing.assert_allclose(x_dot[8], 1.0, atol=1e-10)
         np.testing.assert_allclose(x_dot[6], 0, atol=1e-10)
         np.testing.assert_allclose(x_dot[7], 0, atol=1e-10)
-

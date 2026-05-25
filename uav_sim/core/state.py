@@ -22,7 +22,7 @@ class State:
     @classmethod
     def from_vector(cls, x: np.ndarray):
         """Instantiate state given an ordered vector of the state.
-        
+
         Args:
             x (np.ndarray): 12 x 1 array of states time, pn, pe, pd, u, v, w,
                 phi, theta, psi, p, q, r.
@@ -41,14 +41,14 @@ class Control:
 
     @classmethod
     def from_vector(cls, u: np.ndarray):
-        """Instantiate control given an ordered vector of the control surface deflections.
-        
+        """Instantiate given a vector of control surface deflections.
+
         Args:
             u (np.ndarray): 4 x 1 array of controls elevator, rudder, aileron,
                 and thrust.
         """
         return cls(u[0], u[1], u[2], u[3])
-    
+
     @property
     def vector(self):
         return np.array([self.delta_e, self.delta_r, self.delta_a, self.delta_t])
