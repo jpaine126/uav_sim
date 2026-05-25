@@ -1,0 +1,13 @@
+# core
+numpy
+plotly
+scipy
+pandas
+
+# test
+pytest
+ruff
+
+# build
+hatch
+hatch_vcs

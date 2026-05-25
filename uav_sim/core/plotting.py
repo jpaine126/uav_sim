@@ -3,6 +3,7 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 from .state import State
+from .utilities import rotate_body_to_inertial
 
 
 def plot_state(t, y):
@@ -13,12 +14,12 @@ def plot_state(t, y):
         shared_xaxes=True,
         x_title="Time (s)",
         subplot_titles=(
-            "Position X",
-            "Velocity X",
-            "Position Y",
-            "Velocity Y",
-            "Position Z",
-            "Velocity Z",
+            "North",
+            "Velocity North",
+            "East",
+            "Velocity East",
+            "Up",
+            "Velocity Up",
             "Phi",
             "Phi dot",
             "Theta",
@@ -28,41 +29,148 @@ def plot_state(t, y):
         ),
     )
 
+    # Work on a copy so we do not mutate the caller's array
+    y = np.array(y, copy=True)
+
+    # Convert body velocities to inertial velocities (body -> inertial)
+    y[:, 3:6] = rotate_body_to_inertial(y[:, 6:9], y[:, 3:6])
+
+    # Convert inertial positions/velocities from NED to NEU
+    y[:, 2] = -y[:, 2]
+    y[:, 5] = -y[:, 5]
+
+    # Make plots
     fig.add_scatter(
-        x=t, y=y[0], row=1, col=1, name="Position X",
+        x=t,
+        y=y[:, 0],
+        row=1,
+        col=1,
+        name="North",
     )
     fig.add_scatter(
-        x=t, y=y[1], row=2, col=1, name="Position Y",
+        x=t,
+        y=y[:, 1],
+        row=2,
+        col=1,
+        name="East",
     )
     fig.add_scatter(
-        x=t, y=y[2], row=3, col=1, name="Position Z",
+        x=t,
+        y=y[:, 2],
+        row=3,
+        col=1,
+        name="Up",
     )
     fig.add_scatter(
-        x=t, y=y[3], row=1, col=2, name="Velocity X",
+        x=t,
+        y=y[:, 3],
+        row=1,
+        col=2,
+        name="Velocity North",
     )
     fig.add_scatter(
-        x=t, y=y[4], row=2, col=2, name="Velocity Y",
+        x=t,
+        y=y[:, 4],
+        row=2,
+        col=2,
+        name="Velocity East",
     )
     fig.add_scatter(
-        x=t, y=y[5], row=3, col=2, name="Velocity Z",
+        x=t,
+        y=y[:, 5],
+        row=3,
+        col=2,
+        name="Velocity Down",
     )
     fig.add_scatter(
-        x=t, y=y[6], row=4, col=1, name="Phi",
+        x=t,
+        y=y[:, 6],
+        row=4,
+        col=1,
+        name="Phi",
     )
     fig.add_scatter(
-        x=t, y=y[7], row=5, col=1, name="Theta",
+        x=t,
+        y=y[:, 7],
+        row=5,
+        col=1,
+        name="Theta",
     )
     fig.add_scatter(
-        x=t, y=y[8], row=6, col=1, name="Psi",
+        x=t,
+        y=y[:, 8],
+        row=6,
+        col=1,
+        name="Psi",
     )
     fig.add_scatter(
-        x=t, y=y[9], row=4, col=2, name="Phi dot",
+        x=t,
+        y=y[:, 9],
+        row=4,
+        col=2,
+        name="Phi dot",
     )
     fig.add_scatter(
-        x=t, y=y[10], row=5, col=2, name="Theta dot",
+        x=t,
+        y=y[:, 10],
+        row=5,
+        col=2,
+        name="Theta dot",
     )
     fig.add_scatter(
-        x=t, y=y[11], row=6, col=2, name="Psi dot",
+        x=t,
+        y=y[:, 11],
+        row=6,
+        col=2,
+        name="Psi dot",
+    )
+
+    return fig
+
+
+def plot_control(t, y):
+    """Plot all control from the airframe."""
+    fig = make_subplots(
+        2,
+        2,
+        shared_xaxes=True,
+        x_title="Time (s)",
+        subplot_titles=(
+            "Elevator",
+            "Rudder",
+            "Aileron",
+            "Thrust",
+        ),
+    )
+
+    # Make plots
+    fig.add_scatter(
+        x=t,
+        y=y[:, 0],
+        row=1,
+        col=1,
+        name="Elevator",
+    )
+    fig.add_scatter(
+        x=t,
+        y=y[:, 1],
+        row=2,
+        col=1,
+        name="Rudder",
+    )
+    fig.add_scatter(
+        x=t,
+        y=y[:, 2],
+        row=1,
+        col=2,
+        name="Aileron",
+    )
+    fig.add_scatter(
+        x=t,
+        y=y[:, 3],
+        row=2,
+        col=2,
+        name="Thrust",
     )
 
     return fig
@@ -72,7 +180,11 @@ def body_to_ned(point, state: State):
     """Convert point from body frame to north-east-down."""
     phi, theta, psi = state.angle
     R_roll = np.array(
-        [[1, 0, 0], [0, np.cos(phi), -np.sin(phi)], [0, np.sin(phi), np.cos(phi)],]
+        [
+            [1, 0, 0],
+            [0, np.cos(phi), -np.sin(phi)],
+            [0, np.sin(phi), np.cos(phi)],
+        ]
     )
     R_pitch = np.array(
         [
@@ -82,7 +194,11 @@ def body_to_ned(point, state: State):
         ]
     )
     R_yaw = np.array(
-        [[np.cos(psi), -np.sin(psi), 0], [np.sin(psi), np.cos(psi), 0], [0, 0, 1],]
+        [
+            [np.cos(psi), -np.sin(psi), 0],
+            [np.sin(psi), np.cos(psi), 0],
+            [0, 0, 1],
+        ]
     )
     R = R_roll @ R_pitch @ R_yaw
     ned = R @ point
@@ -92,7 +208,13 @@ def body_to_ned(point, state: State):
 
 def ned_to_enu(point):
     """Convert point from north-east-down to east-north-up."""
-    R = np.array([[0, 1, 0], [1, 0, 0], [0, 0, -1],])
+    R = np.array(
+        [
+            [0, 1, 0],
+            [1, 0, 0],
+            [0, 0, -1],
+        ]
+    )
     enu = R @ point
     return enu
 
@@ -100,21 +222,24 @@ def ned_to_enu(point):
 def render_aircraft_frame(state, body_vertices):
     """Render an aircraft frame state from its body frame vertices to a plot trace."""
     points_enu = np.row_stack(
-        (
+        [
             ned_to_enu(body_to_ned(point, state) + state.position)
             for point in body_vertices
-        )
+        ]
     )
 
     trace = go.Mesh3d(
-        x=points_enu[:, 0], y=points_enu[:, 1], z=points_enu[:, 2], color="blue",
+        x=points_enu[:, 0],
+        y=points_enu[:, 1],
+        z=points_enu[:, 2],
+        color="blue",
     )
 
     return trace
 
 
 def animate_airframe(time, state_array, airframe_vertices):
-    """Animate airframe postion over time."""
+    """Animate airframe position over time."""
 
     state_series = [
         State.from_vector(np.hstack((t, state_y)))
@@ -123,24 +248,24 @@ def animate_airframe(time, state_array, airframe_vertices):
 
     frames = [render_aircraft_frame(state, airframe_vertices) for state in state_series]
 
-    min_x = state_array[0].min() - 10
-    max_x = state_array[0].max() + 10
-    min_y = state_array[1].min() - 10
-    max_y = state_array[1].max() + 10
-    min_z = state_array[2].min() - 10
-    max_z = state_array[2].max() + 10
+    min_y = state_array[0].min() - 10
+    max_y = state_array[0].max() + 10
+    min_x = state_array[1].min() - 10
+    max_x = state_array[1].max() + 10
+    max_z = -(state_array[2].min() - 10)
+    min_z = -(state_array[2].max() + 10)
 
     body_animation = go.Figure(
         data=[frames[0]],
         layout=go.Layout(
             title="Aircraft Animation",
-            scene=dict(
+            scene=go.Scene(
                 xaxis=dict(range=[min_x, max_x], autorange=False),
                 yaxis=dict(range=[min_y, max_y], autorange=False),
                 zaxis=dict(range=[min_z, max_z], autorange=False),
                 aspectratio_x=1,
-                aspectratio_y=1,
-                aspectratio_z=1,
+                aspectratio_y=(max_y - min_y) / (max_x - min_x),
+                aspectratio_z=(max_z - min_z) / (max_x - min_x),
             ),
             updatemenus=[
                 dict(
@@ -151,7 +276,10 @@ def animate_airframe(time, state_array, airframe_vertices):
                             method="animate",
                             args=[
                                 None,
-                                {"frame": {"duration": 10}, "fromcurrent": True,},
+                                {
+                                    "frame": {"duration": 10},
+                                    "fromcurrent": True,
+                                },
                             ],
                         ),
                         dict(
@@ -159,7 +287,10 @@ def animate_airframe(time, state_array, airframe_vertices):
                             method="animate",
                             args=[
                                 [None],
-                                {"frame": {"duration": 0}, "mode": "immediate",},
+                                {
+                                    "frame": {"duration": 0},
+                                    "mode": "immediate",
+                                },
                             ],
                         ),
                     ],
