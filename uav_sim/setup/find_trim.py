@@ -129,14 +129,14 @@ def find_trim(
         # In trim we want:
         #   u_dot = v_dot = w_dot = 0   (no translational acceleration)
         #   p_dot = q_dot = r_dot = 0   (no rotational acceleration)
-        # The position / angle kinematics will naturally follow the flight path.
+        # The position / angle kinematics will naturally follow the flight path
         accel_sq = np.sum(derivatives[3:6] ** 2)  # u_dot, v_dot, w_dot
         ang_accel_sq = np.sum(derivatives[9:12] ** 2)  # p_dot, q_dot, r_dot
 
-        # Also penalise deviation from the kinematic angle rates.
+        # Also penalize deviation from the kinematic angle rates
         # For a straight flight these should be zero; for a turn they are
         # already baked in via p_des/q_des/r_des, so their derivatives
-        # should still be driven to zero by the ang_accel_sq term above.
+        # should still be driven to zero by the ang_accel_sq term above
         return float(accel_sq + ang_accel_sq)
 
     # Variable bounds

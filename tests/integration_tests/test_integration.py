@@ -40,7 +40,7 @@ class TestBallisticEnergyConservation:
 
         def wrapper(t, y):
             state = State(t, y[0:3], y[3:6], y[6:9], y[9:12])
-            # gravity only: body-frame gravity = mass * R_i^b @ [0,0,g]
+            # Gravity only: body-frame gravity = mass * R_i^b @ [0,0,g]
             g_ned = np.array([0, 0, params.gravity])
             forces = params.mass * utilities.rotate_inertial_to_body(state.angle, g_ned)
             moments = np.zeros(3)
@@ -59,7 +59,7 @@ class TestBallisticEnergyConservation:
             dense_output=True,
         )
 
-        # compute total mechanical energy at each timestep
+        # Compute total mechanical energy at each timestep
         positions = sol.y[0:3, :].T
         velocities = sol.y[3:6, :].T
         # h = -pd  (height above origin)
@@ -68,7 +68,7 @@ class TestBallisticEnergyConservation:
         kinetic = 0.5 * params.mass * np.sum(velocities ** 2, axis=1)
         total_energy = potential + kinetic
 
-        # energy should be conserved to within solver tolerance
+        # Energy should be conserved to within solver tolerance
         max_drift = np.max(np.abs(total_energy - total_energy[0]))
         assert max_drift < 0.5, f"Energy drifted by {max_drift}"
 
@@ -85,7 +85,7 @@ class TestBallisticEnergyConservation:
 
         def wrapper(t, y):
             state = State(t, y[0:3], y[3:6], y[6:9], y[9:12])
-            # gravity only: body-frame gravity = mass * R_i^b @ [0,0,g]
+            # Gravity only: body-frame gravity = mass * R_i^b @ [0,0,g]
             g_ned = np.array([0, 0, params.gravity])
             forces = params.mass * utilities.rotate_inertial_to_body(state.angle, g_ned)
             moments = np.zeros(3)
@@ -103,9 +103,9 @@ class TestBallisticEnergyConservation:
             t_eval=np.linspace(0, 2, 200),
         )
 
-        # angular rates should remain zero
+        # Angular rates should remain zero
         np.testing.assert_allclose(sol.y[9:12, :], 0, atol=1e-10)
-        # angles should remain constant (no coupling if rates are zero)
+        # Angles should remain constant (no coupling if rates are zero)
         for i, expected_angle in enumerate(initial_state.angle):
             np.testing.assert_allclose(sol.y[6 + i, :], expected_angle, atol=1e-10)
 
@@ -250,7 +250,7 @@ class TestTrimSolver:
         np.testing.assert_allclose(derivatives[3:6], np.zeros(3), atol=1e-1)
         np.testing.assert_allclose(derivatives[9:12], np.zeros(3), atol=1e-1)
 
-        # yaw rate should be Va / R
+        # Yaw rate should be Va / R
         expected_yaw_rate = Va_calc / R_turn
         np.testing.assert_allclose(derivatives[8], expected_yaw_rate, atol=1e-2)
 
@@ -287,13 +287,13 @@ class TestOpenLoopTrimStability:
             t_eval=np.linspace(0, 5, 500),
         )
 
-        # airspeed should remain roughly constant
+        # Airspeed should remain roughly constant
         velocities = sol.y[3:6, :].T
         airspeeds = np.linalg.norm(velocities, axis=1)
         airspeed_drift = np.max(np.abs(airspeeds - airspeeds[0]))
         assert airspeed_drift < 1.0, f"Airspeed drifted by {airspeed_drift}"
 
-        # altitude should stay roughly constant (straight and level)
+        # Altitude should stay roughly constant (straight and level)
         p_d = sol.y[2, :]
         altitude_drift = np.max(np.abs(p_d - p_d[0]))
         assert altitude_drift < 10.0, f"Altitude drifted by {altitude_drift}"

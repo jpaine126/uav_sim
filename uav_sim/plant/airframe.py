@@ -67,7 +67,7 @@ class Airframe(Dynamic):
         P = self.P
         x_dot = np.zeros((12,))
 
-        # relabel the inputs
+        # Relabel the inputs
         pn = x.position[0]
         pe = x.position[1]
         pd = x.position[2]
@@ -122,7 +122,7 @@ class Airframe(Dynamic):
     def get_airspeed_alpha_beta(self, x: State, control: Control, wind: np.ndarray):
         P = self.P
 
-        # relabel the inputs
+        # Relabel the inputs
         pn = x.position[0]
         pe = x.position[1]
         pd = x.position[2]
@@ -146,7 +146,7 @@ class Airframe(Dynamic):
         v_wg = wind[4]  # gust along body y-axis
         w_wg = wind[5]  # gust along body z-axis
 
-        # compute air data
+        # Compute air data
         V_bw = rotate_inertial_to_body(
             x.angle, np.array([w_ns, w_es, w_ds])
         ) + np.array([u_wg, v_wg, w_wg])
@@ -178,10 +178,10 @@ class Airframe(Dynamic):
     ):
         """Calculate the forces and moments on the airframe."""
         if wind is not None and all(i is None for i in [airspeed, alpha, beta]):
-            # calculate from full state and wind
+            # Calculate from full state and wind
             airspeed, alpha, beta = self.get_airspeed_alpha_beta(x, control, wind)
         elif all(i is not None for i in [airspeed, alpha, beta]) and wind is None:
-            # calculate directly from given airspeed, attack, sideslip
+            # Calculate directly from given airspeed, attack, sideslip
             w_n = None
             w_e = None
             w_d = None
@@ -192,7 +192,7 @@ class Airframe(Dynamic):
             )
         P = self.P
 
-        # relabel the inputs
+        # Relabel the inputs
         pn = x.position[0]
         pe = x.position[1]
         pd = x.position[2]
@@ -210,7 +210,7 @@ class Airframe(Dynamic):
         delta_r = control.delta_r
         delta_t = control.delta_t
 
-        # compute wind data in NED
+        # Compute wind data in NED
         ct = np.cos(theta)
         cu = np.cos(psi)
         cp = np.cos(phi)
@@ -218,7 +218,7 @@ class Airframe(Dynamic):
         su = np.sin(psi)
         sp = np.sin(phi)
 
-        # compute external forces and torques on aircraft
+        # Compute external forces and torques on aircraft
         f1 = (
             -P.mass * P.gravity * st
             + (

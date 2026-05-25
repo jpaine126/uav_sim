@@ -46,9 +46,9 @@ class TestEulerToDcm:
         n = 10
         angles = np.random.uniform(-np.pi, np.pi, (n, 3))
         # Our euler_to_dcm returns R_i^b (inertial->body), which is the
-        # transpose of scipy's R_b^i (body->inertial).
+        # transpose of scipy's R_b^i (body->inertial)
         # We use transpose(2,1,0) to swap within each (3x3) slice while
-        # bringing the batch dimension to the back.
+        # bringing the batch dimension to the back
         expected = (
             R.from_euler("xyz", angles).as_matrix().transpose(2, 1, 0)
         )
@@ -70,9 +70,9 @@ class TestRotateInertialToBody:
     def test_pure_yaw_rotates_north_to_body_x(self):
         """Pure yaw (90 deg CCW when looking down) should map
         inertial-North to body-East if using standard convention."""
-        # yaw = 90 deg: the body x-axis points inertial-East.
+        # yaw = 90 deg: the body x-axis points inertial-East
         # A purely-North inertial vector should therefore appear along
-        # the negative body-y axis.
+        # the negative body-y axis
         angle = np.array([0, 0, np.pi / 2])
         vec_i = np.array([1, 0, 0])  # North
         vec_b = utilities.rotate_inertial_to_body(angle, vec_i)

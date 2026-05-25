@@ -96,8 +96,8 @@ class TestTrimSolver:
         trim_state, trim_control = find_trim(
             desired_airspeed=10.0,
         )
-        # Previously the function set angle[2] = 0 directly.
-        # After the fix the returned yaw should already be 0.0.
+        # Previously the function set angle[2] = 0 directly
+        # After the fix the returned yaw should already be 0.0
         assert np.isfinite(trim_state.angle[2])
         assert np.all(np.isfinite(trim_state.position))
 

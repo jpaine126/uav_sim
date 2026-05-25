@@ -9,7 +9,7 @@ def get_params():
     Jy = 0.0576
     Jz = 0.1712
     Jxz = 0.0015
-    # aerodynamic coefficients
+    # Aerodynamic coefficients
     S_wing = 0.2589
     b = 1.4224
     c = 0.3302

@@ -25,7 +25,7 @@ def euler_to_dcm(roll, pitch, yaw):
     s_yaw = np.sin(yaw)
 
     if roll.ndim == 0:
-        # Scalar euler angles -- return a simple (3, 3) matrix.
+        # Scalar euler angles -- return a simple (3, 3) matrix
         return np.array(
             [
                 [c_pitch * c_yaw, c_pitch * s_yaw, -s_pitch],
@@ -34,7 +34,7 @@ def euler_to_dcm(roll, pitch, yaw):
             ]
         )
     else:
-        # Array euler angles -- return (3, 3, N) stack.
+        # Array euler angles -- return (3, 3, N) stack
         R = np.empty((3, 3, roll.size))
         R[0, 0, :] = c_pitch * c_yaw
         R[0, 1, :] = c_pitch * s_yaw

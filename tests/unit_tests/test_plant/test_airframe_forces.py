@@ -34,7 +34,7 @@ class TestGravityForces:
         g_ned = np.array([0, 0, params.gravity])
         g_body = R @ g_ned
         # In the body frame, gravity points +z. The aerodynamic force
-        # that counters gravity also points +z.
+        # that counters gravity also points +z
         np.testing.assert_allclose(g_body, np.array([0, 0, params.gravity]), atol=1e-10)
         # Total external force = mass * g_body
         total_force = params.mass * g_body
@@ -47,7 +47,7 @@ class TestGravityForces:
         g_ned = np.array([0, 0, params.gravity])
         g_body = R @ g_ned
         # Gravity now aligns with -body-x (positive down -> negative body-x
-        # because body-x points up).
+        # because body-x points up)
         np.testing.assert_allclose(g_body, np.array([-params.gravity, 0, 0]), atol=1e-10)
 
     def test_pitch_minus90_pitches_gravity_onto_body_x(self, airframe):
@@ -56,7 +56,7 @@ class TestGravityForces:
         R = utilities.euler_to_dcm(0, -np.pi / 2, 0)
         g_ned = np.array([0, 0, params.gravity])
         g_body = R @ g_ned
-        # Gravity now aligns with +body-x.
+        # Gravity now aligns with +body-x
         np.testing.assert_allclose(g_body, np.array([params.gravity, 0, 0]), atol=1e-10)
 
     def test_roll_90_moves_gravity_to_body_y(self, airframe):
@@ -65,7 +65,7 @@ class TestGravityForces:
         R = utilities.euler_to_dcm(np.pi / 2, 0, 0)
         g_ned = np.array([0, 0, params.gravity])
         g_body = R @ g_ned
-        # Gravity now aligns with +body-y.
+        # Gravity now aligns with +body-y
         np.testing.assert_allclose(g_body, np.array([0, params.gravity, 0]), atol=1e-10)
 
     def test_roll_minus90_moves_gravity_to_negative_body_y(self, airframe):
@@ -74,7 +74,7 @@ class TestGravityForces:
         R = utilities.euler_to_dcm(-np.pi / 2, 0, 0)
         g_ned = np.array([0, 0, params.gravity])
         g_body = R @ g_ned
-        # Gravity now aligns with -body-y.
+        # Gravity now aligns with -body-y
         np.testing.assert_allclose(g_body, np.array([0, -params.gravity, 0]), atol=1e-10)
 
     def test_zero_alpha_cx_and_cz_signs(self, airframe):
@@ -84,7 +84,7 @@ class TestGravityForces:
 
         alpha = 0.0
         # At alpha=0, CL(0) = C_L_0 and CD(0) contains the drag-polar
-        # term C_L_0^2 / (pi * e * AR).
+        # term C_L_0^2 / (pi * e * AR)
         expected_cd0 = params.C_D_p + (params.C_L_0 ** 2) / (
             np.pi * params.e * params.AR
         )

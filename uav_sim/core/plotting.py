@@ -29,17 +29,17 @@ def plot_state(t, y):
         ),
     )
 
-    # Work on a copy so we do not mutate the caller's array.
+    # Work on a copy so we do not mutate the caller's array
     y = np.array(y, copy=True)
 
-    # convert body velocities to inertial velocities (body -> inertial)
+    # Convert body velocities to inertial velocities (body -> inertial)
     y[:, 3:6] = rotate_body_to_inertial(y[:, 6:9], y[:, 3:6])
 
-    # convert inertial positions/velocities from NED to NEU
+    # Convert inertial positions/velocities from NED to NEU
     y[:, 2] = -y[:, 2]
     y[:, 5] = -y[:, 5]
 
-    # make plots
+    # Make plots
     fig.add_scatter(
         x=t, y=y[:, 0], row=1, col=1, name="North",
     )
@@ -95,7 +95,7 @@ def plot_control(t, y):
         ),
     )
 
-    # make plots
+    # Make plots
     fig.add_scatter(
         x=t, y=y[:, 0], row=1, col=1, name="Elevator",
     )
